@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <Simulation>
   <RunInfo>
-    <WorkingDir>r2</WorkingDir>
+    <WorkingDir>r3</WorkingDir>
     <Sequence>generate_data,plot</Sequence>
     <batchSize>4</batchSize>
   </RunInfo>
@@ -22,7 +22,7 @@
 
   <Models>
     <ExternalModel ModuleToLoad="../../../ExternalModels/projectile.py" name="projectile" subType="">
-      <variables>v0,angle,r,t,timeOption</variables>
+      <variables>v0,angle,r,t,y0,timeOption</variables>
     </ExternalModel>
   </Models>
 
@@ -32,23 +32,23 @@
         <limit>1000</limit>
         <initialSeed>42</initialSeed>
       </samplerInit>
-      <variable name="v0">
-        <distribution>vel_dist</distribution>
+      <variable name="y0">
+        <distribution>y0_dist</distribution>
       </variable>
       <variable name="angle">
         <distribution>angle_dist</distribution>
       </variable>
       <constant name="x0">0</constant>
-      <constant name="y0">0</constant>
+      <constant name="v0">30</constant>
       <constant name="timeOption">1</constant>
     </MonteCarlo>
   </Samplers>
 
   <Distributions>
-    <Normal name="vel_dist">
-      <mean>30</mean>
-      <sigma>5</sigma>
-    </Normal>
+    <Uniform name="y0_dist">
+      <lowerBound>0</lowerBound>
+      <upperBound>1</upperBound>
+    </Uniform>
     <Uniform name="angle_dist">
       <lowerBound>5</lowerBound>
       <upperBound>85</upperBound>
@@ -57,10 +57,10 @@
 
   <DataObjects>
     <PointSet name="placeholder">
-      <Input>v0,angle</Input>
+      <Input>y0,angle</Input>
     </PointSet>
     <PointSet name="results">
-      <Input>v0,angle</Input>
+      <Input>y0,angle</Input>
       <Output>r,t</Output>
     </PointSet>
   </DataObjects>
@@ -74,17 +74,17 @@
       <plotSettings>
         <plot>
           <type>scatter</type>
-          <x>results|Input|v0</x>
+          <x>results|Input|y0</x>
           <y>results|Input|angle</y>
           <z>results|Output|r</z>
           <colorMap>results|Output|t</colorMap>
         </plot>
-        <xlabel>v0</xlabel>
+        <xlabel>y0</xlabel>
         <ylabel>angle</ylabel>
         <zlabel>r</zlabel>
       </plotSettings>
       <actions>
-        <how>png</how>
+        <how>screen, png</how>
       </actions>
     </Plot>
   </OutStreams>

@@ -1,0 +1,27 @@
+<DataObjectMetadata name="stats">
+  <DataSet type="Static">
+    <dims>
+      <mean_ste_x>t</mean_ste_x>
+      <mean_ste_y>t</mean_ste_y>
+      <mean_x>t</mean_x>
+      <mean_y>t</mean_y>
+      <sen_x_angle>t</sen_x_angle>
+      <sen_x_v0>t</sen_x_v0>
+      <sen_x_y0>t</sen_x_y0>
+      <sen_y_angle>t</sen_y_angle>
+      <sen_y_v0>t</sen_y_v0>
+      <sen_y_y0>t</sen_y_y0>
+      <var_ste_x>t</var_ste_x>
+      <var_ste_y>t</var_ste_y>
+      <var_x>t</var_x>
+      <var_y>t</var_y>
+    </dims>
+    <general>
+      <datasetName>stats</datasetName>
+      <outputs>mean_x,mean_y,var_x,var_y,sen_x_y0,sen_x_v0,sen_x_angle,sen_y_y0,sen_y_v0,sen_y_angle</outputs>
+      <pointwise_meta>mean_ste_x,mean_ste_y,var_ste_x,var_ste_y</pointwise_meta>
+      <sampleTag>RAVEN_sample_ID</sampleTag>
+    </general>
+  </DataSet>
+  
+</DataObjectMetadata>

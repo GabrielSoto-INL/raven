@@ -1,0 +1,16 @@
+<DataObjectMetadata name="syncedHistories">
+  <DataSet type="Static">
+    <dims>
+      <x>t</x>
+      <y>t</y>
+    </dims>
+    <general>
+      <datasetName>syncedHistories</datasetName>
+      <inputs>v0,y0,angle</inputs>
+      <outputs>x,y</outputs>
+      <pointwise_meta>PointProbability,ProbabilityWeight,ProbabilityWeight-angle,ProbabilityWeight-v0,ProbabilityWeight-y0,prefix</pointwise_meta>
+      <sampleTag>RAVEN_sample_ID</sampleTag>
+    </general>
+  </DataSet>
+  
+</DataObjectMetadata>

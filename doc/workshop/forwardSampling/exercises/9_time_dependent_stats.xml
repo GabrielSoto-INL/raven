@@ -1,0 +1,175 @@
+<?xml version="1.0" ?>
+<Simulation>
+  <RunInfo>
+    <WorkingDir>r9</WorkingDir>
+    <Sequence>generate_data, sync_histories, get_stats, print_synced, print_stats, plot</Sequence>
+    <batchSize>4</batchSize>
+  </RunInfo>
+
+  <Steps>
+    <MultiRun name="generate_data">
+      <Sampler class="Samplers" type="MonteCarlo">my_mc</Sampler>
+      <Input class="DataObjects" type="PointSet">placeholder</Input>
+      <Model class="Models" type="ExternalModel">projectile</Model>
+      <Output class="DataObjects" type="HistorySet">histories</Output>
+    </MultiRun>
+    <IOStep name="print_synced" pauseAtEnd="True">
+      <Input class="DataObjects" type="HistorySet">syncedHistories</Input>
+      <Output class="OutStreams" type="Print">to_file_synced</Output>
+    </IOStep>
+    <IOStep name="print_stats" pauseAtEnd="True">
+      <Input class="DataObjects" type="HistorySet">stats</Input>
+      <Output class="OutStreams" type="Print">to_file_stats</Output>
+    </IOStep>
+    <IOStep name="plot" pauseAtEnd="True">
+      <Input class="DataObjects" type="HistorySet">stats</Input>
+      <Output class="OutStreams" type="Plot">plot_means</Output>
+    </IOStep>
+    <PostProcess name="sync_histories">
+      <Input class="DataObjects" type="HistorySet">histories</Input>
+      <Model class="Models" type="PostProcessor">syncer</Model>
+      <Output class="DataObjects" type="HistorySet">syncedHistories</Output>
+    </PostProcess>
+    <PostProcess name="get_stats">
+      <Input class="DataObjects" type="HistorySet">syncedHistories</Input>
+      <Model class="Models" type="PostProcessor">basicStats</Model>
+      <Output class="DataObjects" type="HistorySet">stats</Output>
+      <Output class="OutStreams" type="Print">to_file_stats</Output>
+    </PostProcess>
+  </Steps>
+
+  <Models>
+    <ExternalModel ModuleToLoad="../../../ExternalModels/projectile.py" name="projectile" subType="">
+      <variables>v0,y0,timeOption,angle,r,t,x,y</variables>
+    </ExternalModel>
+    <PostProcessor name="syncer" subType="HistorySetSync">
+      <pivotParameter>t</pivotParameter>
+      <extension>extended</extension>
+      <syncMethod>all</syncMethod>
+    </PostProcessor>
+    <PostProcessor name="basicStats" subType="BasicStatistics">
+      <expectedValue prefix="mean">x,y</expectedValue>
+      <variance prefix="var">x,y</variance>
+      <sensitivity prefix="sen">
+        <targets>x, y</targets>
+        <features>v0, y0, angle</features>
+      </sensitivity>
+      <pivotParameter>t</pivotParameter>
+    </PostProcessor>
+  </Models>
+
+  <Samplers>
+    <MonteCarlo name="my_mc">
+      <samplerInit>
+        <limit>30</limit>
+        <initialSeed>42</initialSeed>
+      </samplerInit>
+      <variable name="v0">
+        <distribution>vel_dist</distribution>
+      </variable>
+      <variable name="angle">
+        <distribution>angle_dist</distribution>
+      </variable>
+      <variable name="y0">
+        <distribution>y0_dist</distribution>
+      </variable>
+      <constant name="x0">0</constant>
+      <constant name="timeOption">1</constant>
+    </MonteCarlo>
+  </Samplers>
+
+  <Distributions>
+    <Uniform name="vel_dist">
+      <lowerBound>1</lowerBound>
+      <upperBound>60</upperBound>
+    </Uniform>
+    <Uniform name="y0_dist">
+      <lowerBound>0</lowerBound>
+      <upperBound>1</upperBound>
+    </Uniform>
+    <Uniform name="angle_dist">
+      <lowerBound>5</lowerBound>
+      <upperBound>85</upperBound>
+    </Uniform>
+  </Distributions>
+
+  <DataObjects>
+    <PointSet name="placeholder">
+      <Input>v0,y0,angle</Input>
+    </PointSet>
+    <PointSet name="results">
+      <Input>v0,y0,angle</Input>
+      <Output>r,t</Output>
+    </PointSet>
+    <HistorySet name="histories">
+      <Input>v0,y0,angle</Input>
+      <Output>x,y</Output>
+      <options>
+        <pivotParameter>t</pivotParameter>
+      </options>
+    </HistorySet>
+    <HistorySet name="syncedHistories">
+      <Input>v0,y0,angle</Input>
+      <Output>x,y</Output>
+      <options>
+        <pivotParameter>t</pivotParameter>
+      </options>
+    </HistorySet>
+    <HistorySet name="stats">
+      <Input>t</Input>
+      <Output>
+        mean_x, mean_y, var_x, var_y, sen_x_y0, sen_x_v0, sen_x_angle, sen_y_y0, sen_y_v0, sen_y_angle
+      </Output>
+      <options>
+        <pivotParameter>t</pivotParameter>
+      </options>
+    </HistorySet>
+  </DataObjects>
+
+  <OutStreams>
+    <Print name="to_file">
+      <type>csv</type>
+      <source>histories</source>
+    </Print>
+    <Print name="to_file_synced">
+      <type>csv</type>
+      <source>syncedHistories</source>
+    </Print>
+    <Print name="to_file_stats">
+      <type>csv</type>
+      <source>stats</source>
+    </Print>
+    <Plot name="plot_means">
+      <plotSettings>
+        <plot>
+          <type>line</type>
+          <x>stats|Output|t</x>
+          <y>stats|Output|sen_y_angle</y>
+          <label>x-position</label>
+        </plot>
+        <plot>
+          <type>line</type>
+          <x>stats|Output|t</x>
+          <y>stats|Output|sen_y_y0</y>
+          <kwargs>
+            <label>y-position</label>
+          </kwargs>
+        </plot>
+        <plot>
+          <type>line</type>
+          <x>stats|Output|t</x>
+          <y>stats|Output|sen_y_v0</y>
+          <kwargs>
+            <label>y-position</label>
+          </kwargs>
+        </plot>
+        <xlabel>t</xlabel>
+        <ylabel>Averages</ylabel>
+      </plotSettings>
+      <actions>
+        <how>screen, png</how>
+      </actions>
+    </Plot>
+  </OutStreams>
+
+</Simulation>

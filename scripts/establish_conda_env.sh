@@ -12,6 +12,7 @@
 
 ECE_SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 RAVEN_LIB_HANDLER=${ECE_SCRIPT_DIR}/library_handler.py
+export RAVEN_IGNORE_VERSIONS=1
 
 # fail if ANYTHING this script fails (mostly, there are exceptions)
 if [ -o errexit ]

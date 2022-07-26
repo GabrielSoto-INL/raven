@@ -1,8 +1,8 @@
 <?xml version="1.0" ?>
 <Simulation>
   <RunInfo>
-    <WorkingDir>r2</WorkingDir>
-    <Sequence>generate_data,plot</Sequence>
+    <WorkingDir>r7</WorkingDir>
+    <Sequence>generate_data,print,plot</Sequence>
     <batchSize>4</batchSize>
   </RunInfo>
 
@@ -11,25 +11,28 @@
       <Sampler class="Samplers" type="MonteCarlo">my_mc</Sampler>
       <Input class="DataObjects" type="PointSet">placeholder</Input>
       <Model class="Models" type="ExternalModel">projectile</Model>
-      <Output class="DataObjects" type="PointSet">results</Output>
+      <Output class="DataObjects" type="HistorySet">histories</Output>
     </MultiRun>
-    <IOStep name="plot" pauseAtEnd="True">
-      <Input class="DataObjects" type="PointSet">results</Input>
+    <IOStep name="print" pauseAtEnd="True">
+      <Input class="DataObjects" type="HistorySet">histories</Input>
       <Output class="OutStreams" type="Print">to_file</Output>
+    </IOStep>
+    <IOStep name="plot" pauseAtEnd="True">
+      <Input class="DataObjects" type="PointSet">histories</Input>
       <Output class="OutStreams" type="Plot">to_plot</Output>
     </IOStep>
   </Steps>
 
   <Models>
     <ExternalModel ModuleToLoad="../../../ExternalModels/projectile.py" name="projectile" subType="">
-      <variables>v0,angle,r,t,timeOption</variables>
+      <variables>v0,y0,timeOption,angle,r,t,x,y</variables>
     </ExternalModel>
   </Models>
 
   <Samplers>
     <MonteCarlo name="my_mc">
       <samplerInit>
-        <limit>1000</limit>
+        <limit>30</limit>
         <initialSeed>42</initialSeed>
       </samplerInit>
       <variable name="v0">
@@ -45,10 +48,14 @@
   </Samplers>
 
   <Distributions>
-    <Normal name="vel_dist">
-      <mean>30</mean>
-      <sigma>5</sigma>
-    </Normal>
+    <Uniform name="vel_dist">
+      <lowerBound>1</lowerBound>
+      <upperBound>60</upperBound>
+    </Uniform>
+    <Uniform name="y0_dist">
+      <lowerBound>0</lowerBound>
+      <upperBound>1</upperBound>
+    </Uniform>
     <Uniform name="angle_dist">
       <lowerBound>5</lowerBound>
       <upperBound>85</upperBound>
@@ -57,34 +64,38 @@
 
   <DataObjects>
     <PointSet name="placeholder">
-      <Input>v0,angle</Input>
+      <Input>v0,y0,angle</Input>
     </PointSet>
     <PointSet name="results">
-      <Input>v0,angle</Input>
+      <Input>v0,y0,angle</Input>
       <Output>r,t</Output>
     </PointSet>
+    <HistorySet name="histories">
+      <Input>v0,y0,angle</Input>
+      <Output>x,y</Output>
+      <options>
+        <pivotParameter>t</pivotParameter>
+      </options>
+    </HistorySet>
   </DataObjects>
 
   <OutStreams>
     <Print name="to_file">
       <type>csv</type>
-      <source>results</source>
+      <source>histories</source>
     </Print>
     <Plot name="to_plot">
       <plotSettings>
         <plot>
-          <type>scatter</type>
-          <x>results|Input|v0</x>
-          <y>results|Input|angle</y>
-          <z>results|Output|r</z>
-          <colorMap>results|Output|t</colorMap>
+          <type>line</type>
+          <x>histories|Output|t</x>
+          <y>histories|Output|y</y>
         </plot>
-        <xlabel>v0</xlabel>
-        <ylabel>angle</ylabel>
-        <zlabel>r</zlabel>
+        <xlabel>t</xlabel>
+        <ylabel>y</ylabel>
       </plotSettings>
       <actions>
-        <how>png</how>
+        <how>screen, png</how>
       </actions>
     </Plot>
   </OutStreams>

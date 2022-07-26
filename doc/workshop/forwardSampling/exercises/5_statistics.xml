@@ -1,0 +1,128 @@
+<?xml version="1.0" ?>
+<Simulation>
+  <RunInfo>
+    <WorkingDir>r5</WorkingDir>
+    <Sequence>generate_data,plot,postprocess</Sequence>
+    <batchSize>4</batchSize>
+  </RunInfo>
+
+  <Steps>
+    <MultiRun name="generate_data">
+      <Sampler class="Samplers" type="Grid">my_grid</Sampler>
+      <Input class="DataObjects" type="PointSet">placeholder</Input>
+      <Model class="Models" type="ExternalModel">projectile</Model>
+      <Output class="DataObjects" type="PointSet">results</Output>
+    </MultiRun>
+    <IOStep name="plot" pauseAtEnd="True">
+      <Input class="DataObjects" type="PointSet">results</Input>
+      <!--<Output class="OutStreams" type="Print">to_file</Output> -->
+      <Output class="OutStreams" type="Plot">to_plot</Output>
+    </IOStep>
+    <PostProcess name="postprocess">
+      <Input class="DataObjects" type="PointSet">results</Input>
+      <Model class="Models" type="PostProcessor">basicStats</Model>
+      <Output class="DataObjects" type="PointSet">stats</Output>
+      <Output class="OutStreams" type="Print">to_file_stats</Output>
+    </PostProcess>
+  </Steps>
+
+  <Models>
+    <ExternalModel ModuleToLoad="../../../ExternalModels/projectile.py" name="projectile" subType="">
+      <variables>v0,angle,r,t,y0,timeOption</variables>
+    </ExternalModel>
+    <PostProcessor name="basicStats" subType="BasicStatistics">
+      <expectedValue prefix="mean">r,t</expectedValue>
+      <variance prefix="var">r,t</variance>
+      <sensitivity prefix="sen">
+        <targets>r,t</targets>
+        <features>y0,angle</features>
+      </sensitivity>
+    </PostProcessor>
+  </Models>
+
+  <Samplers>
+    <MonteCarlo name="my_mc">
+      <samplerInit>
+        <limit>1000</limit>
+        <initialSeed>42</initialSeed>
+      </samplerInit>
+      <variable name="y0">
+        <distribution>y0_dist</distribution>
+      </variable>
+      <variable name="angle">
+        <distribution>angle_dist</distribution>
+      </variable>
+      <constant name="x0">0</constant>
+      <constant name="v0">30</constant>
+      <constant name="timeOption">1</constant>
+    </MonteCarlo>
+
+    <Grid name="my_grid">
+      <variable name="y0">
+        <distribution>y0_dist</distribution>
+        <grid type="value" construction="equal" steps="20">0 1</grid>
+      </variable>
+      <variable name="angle">
+        <distribution>angle_dist</distribution>
+        <grid type="value" construction="equal" steps="20">10 80</grid>
+      </variable>
+      <constant name="x0">0</constant>
+      <constant name="v0">30</constant>
+      <constant name="timeOption">1</constant>
+    </Grid>
+  </Samplers>
+
+  <Distributions>
+    <Uniform name="y0_dist">
+      <lowerBound>0</lowerBound>
+      <upperBound>1</upperBound>
+    </Uniform>
+    <Uniform name="angle_dist">
+      <lowerBound>5</lowerBound>
+      <upperBound>85</upperBound>
+    </Uniform>
+  </Distributions>
+
+  <DataObjects>
+    <PointSet name="placeholder">
+      <Input>y0,angle</Input>
+    </PointSet>
+    <PointSet name="stats">
+      <Input>mean_r, mean_t, var_r, var_t</Input>
+      <Output>sen_r_y0, sen_r_angle</Output>
+    </PointSet>
+    <PointSet name="results">
+      <Input>y0,angle</Input>
+      <Output>r,t</Output>
+    </PointSet>
+  </DataObjects>
+
+  <OutStreams>
+    <Print name="to_file">
+      <type>csv</type>
+      <source>results</source>
+    </Print>
+    <Print name="to_file_stats">
+      <type>csv</type>
+      <source>stats</source>
+    </Print>
+    <Plot name="to_plot">
+      <plotSettings>
+        <plot>
+          <type>scatter</type>
+          <x>results|Input|y0</x>
+          <y>results|Input|angle</y>
+          <z>results|Output|r</z>
+          <colorMap>results|Output|t</colorMap>
+        </plot>
+        <xlabel>y0</xlabel>
+        <ylabel>angle</ylabel>
+        <zlabel>r</zlabel>
+      </plotSettings>
+      <actions>
+        <how>screen, png</how>
+      </actions>
+    </Plot>
+  </OutStreams>
+
+</Simulation>
