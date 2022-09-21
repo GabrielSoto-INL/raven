@@ -96,6 +96,20 @@ def run(raven, inputs):
   raven.v = res['v']
   raven.a = res['a']
 
+
+def implicitConstraint(raven):
+  """
+    Implicit constrain.
+    @ In, raven, object, raven self
+    @ Out, implicitConstraint, point ok or not?
+  """
+  height = raven.ymax
+  if height >= 250:
+    return False
+  else:
+    return True
+
+
 def get_from_raven(attr, raven, default=None):
   return np.squeeze(getattr(raven, attr, default))
 

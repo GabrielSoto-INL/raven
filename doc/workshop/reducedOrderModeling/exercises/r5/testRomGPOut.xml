@@ -1,0 +1,12 @@
+<DataObjectMetadata name="testRomOut">
+  <DataSet type="Static">
+    <general>
+      <datasetName>testRomOut</datasetName>
+      <inputs>angle</inputs>
+      <outputs>r</outputs>
+      <pointwise_meta>PointProbability,ProbabilityWeight,ProbabilityWeight-angle,ProbabilityWeight-v0,ProbabilityWeight-x0,ProbabilityWeight-y0,prefix</pointwise_meta>
+      <sampleTag>RAVEN_sample_ID</sampleTag>
+    </general>
+  </DataSet>
+  
+</DataObjectMetadata>

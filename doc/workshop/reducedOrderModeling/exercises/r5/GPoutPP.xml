@@ -1,0 +1,10 @@
+<DataObjectMetadata name="outPP">
+  <DataSet type="Static">
+    <general>
+      <datasetName>outPP</datasetName>
+      <outputs>cv_MAE_r,cv_MSE_r</outputs>
+      <sampleTag>RAVEN_sample_ID</sampleTag>
+    </general>
+  </DataSet>
+  
+</DataObjectMetadata>

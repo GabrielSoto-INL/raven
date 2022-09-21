@@ -1,0 +1,11 @@
+<DataObjectMetadata name="search_path">
+  <DataSet type="Static">
+    <general>
+      <datasetName>search_path</datasetName>
+      <inputs>trajID</inputs>
+      <outputs>iteration,accepted,v0,angle,ymax,r</outputs>
+      <sampleTag>RAVEN_sample_ID</sampleTag>
+    </general>
+  </DataSet>
+  
+</DataObjectMetadata>

@@ -40,11 +40,11 @@
   </Models>
 
   <Functions>
-    <External file="../../Models/myConstraints.py" name="expConstr1">
+    <External file="../../Models/Constraints.py" name="expConstr1">
       <variables>x1,x2,x3,x4,x5,x6</variables>
     </External>
-    <External file="../../Models/myConstraints.py" name="impConstr1">
-      <variables>x1,x2,x3,x4,x5,x6,obj</variables>
+    <External file="../../Models/Constraints.py" name="expConstr2">
+      <variables>x1,x2,x3,x4,x5,x6</variables>
     </External>
   </Functions>
 
@@ -120,6 +120,7 @@
       <TargetEvaluation class="DataObjects" type="PointSet">optOut</TargetEvaluation>
       <Sampler class="Samplers" type="MonteCarlo">MC_samp</Sampler>
       <Constraint class='Functions' type='External'>expConstr1</Constraint><!--Complete this-->
+      <Constraint class='Functions' type='External'>expConstr2</Constraint><!--Complete this-->
       <!-- <ImplicitConstraint class='Functions' type='External'>impConstr1</ImplicitConstraint> -->
     </GeneticAlgorithm>
   </Optimizers>

@@ -24,14 +24,14 @@
     </MultiRun>
     <PostProcess name="trainAndValidateStep">
       <Input class="DataObjects" type="PointSet">outMC</Input>
-      <Input class="Models" type="ROM">myROMIDW</Input>
+      <Input class="Models" type="ROM">myROMSVR</Input>
       <Model class="Models" type="PostProcessor">trainAndValidatePP</Model>
       <Output class="DataObjects" type="PointSet">outPP</Output>
-      <Output class="OutStreams" type="Print">IDWoutPP</Output>
+      <Output class="OutStreams" type="Print">SVRoutPP</Output>
     </PostProcess>
     <IOStep name="dumpRom">
-      <Input class="Models" type="ROM">myROMIDW</Input>
-      <Output class="Files" type="">pkIDW</Output>
+      <Input class="Models" type="ROM">myROMSVR</Input>
+      <Output class="Files" type="">pkSVR</Output>
     </IOStep>
     <MultiRun name="sampleModel">
       <Input class="DataObjects" type="PointSet">testingSet</Input>
@@ -42,15 +42,15 @@
     </MultiRun>
     <MultiRun name="sampleRom">
       <Input class="DataObjects" type="PointSet">testingSet</Input>
-      <Model class="Models" type="ROM">myROMIDW</Model>
+      <Model class="Models" type="ROM">myROMSVR</Model>
       <Sampler class="Samplers" type="MonteCarlo">testSetMCSampler</Sampler>
       <Output class="DataObjects" type="PointSet">testRomOut</Output>
-      <Output class="OutStreams" type="Print">testRomIDWOut</Output>
+      <Output class="OutStreams" type="Print">testRomSVROut</Output>
     </MultiRun>
-    <IOStep name="plot">
+    <IOStep name="plot" pauseAtEnd="True">
       <Input class="DataObjects" type="PointSet">testModelOut</Input>
       <Input class="DataObjects" type="PointSet">testRomOut</Input>
-      <Output class="OutStreams" type="Plot">model_vs_IDW_ROM</Output>
+      <Output class="OutStreams" type="Plot">model_vs_SVR_ROM</Output>
     </IOStep>
   </Steps>
 
@@ -77,7 +77,7 @@
       <Features>angle</Features>
       <Target>r</Target>
       <kernel>rbf</kernel>
-      <epsilon>0.0001</epsilon>
+      <!--<epsilon>0.0001</epsilon>-->
     </ROM>
     <ROM name="myROMKMLP" subType="KerasMLPRegression">
       <Features>angle</Features>
@@ -126,7 +126,7 @@
   </Metrics>
 
   <Files>
-    <Input name="pkIDW" type="">IDW.pk</Input>
+    <Input name="pkSVR" type="">SVR.pk</Input>
   </Files>
 
   <Samplers>
@@ -197,7 +197,7 @@
       <type>csv</type>
       <source>outMC</source>
     </Print>
-    <Print name="IDWoutPP">
+    <Print name="SVRoutPP">
       <type>csv</type>
       <source>outPP</source>
     </Print>
@@ -205,11 +205,11 @@
       <type>csv</type>
       <source>testModelOut</source>
     </Print>
-    <Print name="testRomIDWOut">
+    <Print name="testRomSVROut">
       <type>csv</type>
       <source>testRomOut</source>
     </Print>
-    <Plot name="model vs. IDW ROM">
+    <Plot name="model_vs_SVR_ROM">
       <plotSettings>
         <plot>
           <type>scatter</type>
@@ -228,7 +228,7 @@
           <c>blue</c>
           <marker>+</marker>
           <kwargs>
-            <label>IDW ROM</label>
+            <label>SVR ROM</label>
           </kwargs>
         </plot>
         <xlabel>angle (deg)</xlabel>
@@ -238,7 +238,7 @@
         </legend>
       </plotSettings>
       <actions>
-        <how>png</how>
+        <how>screen, png</how>
       </actions>
     </Plot>
   </OutStreams>

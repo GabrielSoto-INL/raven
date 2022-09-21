@@ -48,7 +48,7 @@
   <Samplers>
     <MonteCarlo name="mcSampler">
       <samplerInit>
-        <limit>1</limit>
+        <limit>2</limit>
         <initialSeed>42</initialSeed>
       </samplerInit>
       <constant name="scaling">1.0</constant>
@@ -60,7 +60,7 @@
       <Target>Load,Time</Target>
       <Features>scaling</Features>
       <pivotParameter>Time</pivotParameter>
-      <Fourier>...</Fourier> <!-- TODO: change the value of this node into the base periods  -->
+      <Fourier>604800, 302400, 86400, 43200</Fourier> <!-- TODO: change the value of this node into the base periods  -->
       <P>1</P>
       <Q>3</Q>
     </ROM>

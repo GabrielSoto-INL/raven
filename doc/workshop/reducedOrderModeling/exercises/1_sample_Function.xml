@@ -22,7 +22,7 @@
       <Output class="DataObjects" type="PointSet">outMC</Output>
       <Output class="OutStreams" type="Print">outMC</Output>
     </MultiRun>
-    <IOStep name="plot">
+    <IOStep name="plot" pauseAtEnd="True">
       <Input class="DataObjects" type="PointSet">outMC</Input>
       <Output class="OutStreams" type="Plot">plotMC</Output>
     </IOStep>
@@ -92,7 +92,7 @@
         </legend>
       </plotSettings>
       <actions>
-        <how>png</how>
+        <how>screen, png</how>
       </actions>
     </Plot>
   </OutStreams>

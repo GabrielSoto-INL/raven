@@ -10,7 +10,7 @@
 
   <RunInfo>
     <WorkingDir>r4</WorkingDir>
-    <Sequence>FirstMRun,plot,trainRom,dumpRom,</Sequence><!-- Complete this-->
+    <Sequence>FirstMRun,plot,trainRom,dumpRom,loadRom</Sequence><!-- Complete this-->
     <batchSize>1</batchSize>
   </RunInfo>
 
@@ -21,7 +21,7 @@
       <Sampler class="Samplers" type="MonteCarlo">mcSampler</Sampler>
       <Output class="DataObjects" type="PointSet">outMC</Output>
     </MultiRun>
-    <IOStep name="plot">
+    <IOStep name="plot" pauseAtEnd="True">
       <Input class="DataObjects" type="PointSet">outMC</Input>
       <Output class="OutStreams" type="Plot">plotMC</Output>
     </IOStep>
@@ -35,7 +35,7 @@
     </IOStep>
     <IOStep name="loadRom">
       <Input class="Files" type="">pkIDW</Input>
-      <Output class="XX" type="XX">loadIDW</Output><!-- Complete this-->
+      <Output class="Models" type="ROM">loadIDW</Output><!-- Complete this-->
     </IOStep>
   </Steps>
 
@@ -113,7 +113,7 @@
         </legend>
       </plotSettings>
       <actions>
-        <how>png</how>
+        <how>screen, png</how>
       </actions>
     </Plot>
   </OutStreams>

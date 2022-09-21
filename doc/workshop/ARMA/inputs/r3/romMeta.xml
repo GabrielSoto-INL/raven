@@ -1,0 +1,50 @@
+<DataObjectMetadata name="romMeta">
+  <DataSet type="Static">
+    <dims>
+      <Load_fourier>Time</Load_fourier>
+      <Load_gaussianed>Time</Load_gaussianed>
+      <Load_nofourier>Time</Load_nofourier>
+      <Load_original>Time</Load_original>
+    </dims>
+    <general>
+      <datasetName>romMeta</datasetName>
+      <pointwise_meta>Load_fourier,Load_gaussianed,Load_nofourier,Load_original</pointwise_meta>
+      <sampleTag>RAVEN_sample_ID</sampleTag>
+    </general>
+  </DataSet>
+  
+  <arma type="Static">
+    <ROM>
+      <type>ARMA</type>
+    </ROM>
+    <Load>
+      <Fourier>
+        <SignalIntercept>5.185824243e+04</SignalIntercept>
+        <period>6.048000000e+05
+          <frequency>1.653439153e-06</frequency>
+          <amplitude>1.240998236e+03</amplitude>
+          <phase>1.813097922e+00</phase>
+        </period>
+        <period>3.024000000e+05
+          <frequency>3.306878307e-06</frequency>
+          <amplitude>4.332174297e+02</amplitude>
+          <phase>9.577771588e-02</phase>
+        </period>
+        <period>8.640000000e+04
+          <frequency>1.157407407e-05</frequency>
+          <amplitude>1.239037553e+04</amplitude>
+          <phase>-2.648098670e+00</phase>
+        </period>
+        <period>4.320000000e+04
+          <frequency>2.314814815e-05</frequency>
+          <amplitude>8.959720034e+01</amplitude>
+          <phase>2.802323855e+00</phase>
+        </period>
+      </Fourier>
+      <ARMA_params>
+        <std>0.446718509396</std>
+      </ARMA_params>
+    </Load>
+  </arma>
+  
+</DataObjectMetadata>

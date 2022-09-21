@@ -15,7 +15,7 @@
 
 import numpy as np
 
-def XX(Input):#Complete this: give the function the correct name#
+def constrain(Input):#Complete this: give the function the correct name#
   """
     This fuction calls the explicit constraint whose name is passed through Input.name
     the evaluation function g is negative if the explicit constraint is violated and positive otherwise.
@@ -44,7 +44,7 @@ def YY(Input):#Complete this: give the function the correct name#
   return g
 
 
-def XX(Input):#You are free to pick this name but it has to be similar to the one in the xml#
+def expConstr1(Input):#You are free to pick this name but it has to be similar to the one in the xml#
   """
     Let's assume that the constraint is:
     $ x3+x4 < 8 $
@@ -54,7 +54,7 @@ def XX(Input):#You are free to pick this name but it has to be similar to the on
     @ In, Input, object, RAVEN container
     @ out, g, float, explicit constraint 1 evaluation function
   """
-  g = # Write the explicit constraint here
+  g = 8 -Input.x3 - Input.x4 # Write the explicit constraint here
   return g
 
 def expConstr2(Input):

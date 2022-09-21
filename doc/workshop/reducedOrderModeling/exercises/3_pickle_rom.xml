@@ -9,8 +9,8 @@
   </TestInfo>
 
   <RunInfo>
-    <WorkingDir></WorkingDir><!-- Complete this-->
-    <Sequence>FirstMRun,plot,trainRom,</Sequence><!-- Complete this-->
+    <WorkingDir>r3</WorkingDir><!-- Complete this-->
+    <Sequence>FirstMRun,plot,trainRom,dumpRom</Sequence><!-- Complete this-->
     <batchSize>1</batchSize>
   </RunInfo>
 
@@ -21,7 +21,7 @@
       <Sampler class="Samplers" type="MonteCarlo">mcSampler</Sampler>
       <Output class="DataObjects" type="PointSet">outMC</Output>
     </MultiRun>
-    <IOStep name="plot">
+    <IOStep name="plot" pauseAtEnd="True">
       <Input class="DataObjects" type="PointSet">outMC</Input>
       <Output class="OutStreams" type="Plot">plotMC</Output>
     </IOStep>
@@ -30,8 +30,8 @@
       <Output class="Models" type="ROM">IDW</Output>
     </RomTrainer>
     <IOStep name="dumpRom">
-      <Input class="Models" type=""></Input><!-- Complete this-->
-      <Output class="" type="">pkIDW</Output><!-- Complete this-->
+      <Input class="Models" type="ROM">IDW</Input><!-- Complete this-->
+      <Output class="Files" type="">pkIDW</Output><!-- Complete this-->
     </IOStep>
   </Steps>
 
@@ -82,7 +82,7 @@
   </DataObjects>
 
   <Files>
-    <Input name="??" type="">IDW.pk</Input><!-- Complete this-->
+    <Input name="pkIDW" type="">IDW.pk</Input><!-- Complete this-->
   </Files>
 
   <OutStreams>
@@ -104,7 +104,7 @@
         </legend>
       </plotSettings>
       <actions>
-        <how>png</how>
+        <how> screen, png</how>
       </actions>
     </Plot>
   </OutStreams>

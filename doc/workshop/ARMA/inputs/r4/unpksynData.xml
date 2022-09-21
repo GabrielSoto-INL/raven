@@ -1,0 +1,15 @@
+<DataObjectMetadata name="unpksynData">
+  <DataSet type="Static">
+    <dims>
+      <Load>Time</Load>
+    </dims>
+    <general>
+      <datasetName>unpksynData</datasetName>
+      <inputs>scaling</inputs>
+      <outputs>Load</outputs>
+      <pointwise_meta>PointProbability,ProbabilityWeight,prefix</pointwise_meta>
+      <sampleTag>RAVEN_sample_ID</sampleTag>
+    </general>
+  </DataSet>
+  
+</DataObjectMetadata>

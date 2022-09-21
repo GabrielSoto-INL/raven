@@ -1,0 +1,25 @@
+<DataObjectMetadata name="romMeta">
+  <DataSet type="Static">
+    <dims>
+      <Speed_gaussianed>Time</Speed_gaussianed>
+      <Speed_original>Time</Speed_original>
+    </dims>
+    <general>
+      <datasetName>romMeta</datasetName>
+      <pointwise_meta>Speed_gaussianed,Speed_original</pointwise_meta>
+      <sampleTag>RAVEN_sample_ID</sampleTag>
+    </general>
+  </DataSet>
+  
+  <arma type="Static">
+    <ROM>
+      <type>ARMA</type>
+    </ROM>
+    <Speed>
+      <ARMA_params>
+        <std>0.563914929146</std>
+      </ARMA_params>
+    </Speed>
+  </arma>
+  
+</DataObjectMetadata>

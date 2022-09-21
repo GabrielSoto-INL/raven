@@ -15,7 +15,7 @@
   </RunInfo>
 
   <Files>
-    <Input name="...">../r3/...</Input> <!-- TODO:  your file entity name and actual file name in Exercise 3-->
+    <Input name="pklFile">../r3/arma.pk</Input> <!-- TODO:  your file entity name and actual file name in Exercise 3-->
   </Files>
 
   <Samplers>
@@ -34,7 +34,7 @@
 
   <Steps>
     <IOStep name="read">
-      <Input class="Files" type="">...</Input> <!-- TODO:  your file entity name in Exercise 3-->
+      <Input class="Files" type="">pklFile</Input> <!-- TODO:  your file entity name in Exercise 3-->
       <Output class="Models" type="ROM">arma</Output>
     </IOStep>
     <MultiRun name="sample">
