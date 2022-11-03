@@ -1099,7 +1099,7 @@ class ARMA(SupervisedLearning):
       # to a more accurate fit in the case that values not at the ends of the array are being masked.
       data[~masks] = np.nan
     import statsmodels.api
-    results = statsmodels.tsa.arima.model.ARIMA(data, order=(self.P, 0, self.Q), trend='c').fit()
+    results = statsmodels.tsa.arima.model.ARIMA(data, order=(self.P, 1, self.Q), trend='n').fit()
     # The ARIMAResults object here can cause problems with ray when running in parallel. Dropping it
     # in exchange for the armaResultsProxy class avoids the issue while preserving what we really
     # care out from the ARIMAResults object.
