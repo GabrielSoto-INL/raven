@@ -449,6 +449,14 @@ def _readLibNode(libNode, config, toRemove, opSys, addOptional, limitSources, re
     # if this library's OS's don't match the requested OS, then we move on
     if opSys not in [x.lower().strip() for x in libOS.split(',')]:
       return # nothing to do
+  libMachine = libNode.attrib.get('machine', None)
+  if libMachine is not None:
+    machineType = platform.machine()
+    machineSubst = {'AMD64':'x86_64'} #substitutions for different names
+    if machineType in machineSubst:
+      machineType = machineSubst[machineType] #convert to standard name.
+    if machineType not in [x.lower().strip() for x in libMachine.split(',')]:
+      return # nothing to do since not machine type specified
   # check optional
   ## note that None means "not optional" in this case
   ## further note anything besides "True" is taken to mean "not optional"
@@ -531,6 +539,9 @@ if __name__ == '__main__':
   condaParser.add_argument('--subset', dest='subset',
         choices=('core', 'forge', 'pip', 'pyomo'), default='core',
         help='Use subset of installation libraries, divided by source.')
+  condaParser.add_argument('--no-name', dest='noName',
+                           action='store_true',
+                           help='Do not include --name in output (needed for mamba install)')
 
   pipParser = subParsers.add_parser('pip', help='use pip as installer')
   pipParser.add_argument('--action', dest='action', choices=('install', 'list', 'setup.cfg'), default='install',
@@ -596,7 +607,10 @@ if __name__ == '__main__':
     if args.installer == 'conda':
       installer = 'conda'
       equals = '='
-      actionArgs = '--name {env} -y {src}'
+      if args.noName:
+        actionArgs = '-y {src}'
+      else:
+        actionArgs = '--name {env} -y {src}'
       # which part of the install are we doing?
       if args.subset == 'core' or args.subset == 'forge':
         # from defaults

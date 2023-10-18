@@ -658,6 +658,17 @@ class SupervisedLearning(BaseInterface):
     # by default, nothing to write!
     self.raiseAMessage('Writing ROM "{}", but no pointwise data found. Moving on ...')
 
+  def getSegmentPointwiseData(self):
+    """
+      Allows the SVE to accumulate data arrays to later add to a DataObject
+      Overload in subclasses.
+      @ In, writeTo, xmlUtils.StaticXmlElement instance, Element to write to
+      @ Out, segmentData, dict
+    """
+    # by default, nothing to write!
+    self.raiseAMessage('Writing ROM, but no pointwise data found. Moving on ...')
+    return {}
+
   def writeXML(self, writeTo, targets=None, skip=None):
     """
       Allows the SVE to put whatever it wants into an XML to print to file.
@@ -753,13 +764,14 @@ class SupervisedLearning(BaseInterface):
     # by default, do nothing
     pass
 
-  def finalizeLocalRomSegmentEvaluation(self, settings, evaluation, picker):
+  def finalizeLocalRomSegmentEvaluation(self, settings, evaluation, globalPicker, localPicker=None):
     """
       Allows global settings in "settings" to affect a LOCAL evaluation of a LOCAL ROM
       Note this is called on the LOCAL subsegment ROM and not the GLOBAL templateROM.
       @ In, settings, dict, as from getGlobalRomSegmentSettings
       @ In, evaluation, dict, preliminary evaluation from the local segment ROM as {target: [values]}
-      @ In, picker, slice, indexer for data range of this segment
+      @ In, globalPicker, slice, indexer for data range of this segment FROM GLOBAL SIGNAL
+      @ In, localPicker, slice, optional, indexer for part of signal that should be adjusted IN LOCAL SIGNAL
       @ Out, evaluation, dict, {target: np.ndarray} adjusted global evaluation
     """
     return evaluation

@@ -636,7 +636,7 @@ class Segments(Collection):
     """
       Writes pointwise data about segmentation to a realization.
       @ In, writeTo, DataObject, data structure into which data should be written
-      @ Out, None
+      @ Out, rlz, dict, realization data structure where each entry is an np.ndarray
     """
 
     # realization to add eventually
@@ -654,11 +654,11 @@ class Segments(Collection):
     writeTo.addVariable(varName, np.array([]), classify='meta', indices=['segment_number'])
     rlz[varName] = iE
     # pivot start values
-    varName = 'seg_{}_start'.format(self._templateROM.pivotParameterID)
+    varName = f'seg_{self._templateROM.pivotParameterID}_start'
     writeTo.addVariable(varName, np.array([]), classify='meta', indices=['segment_number'])
     rlz[varName] = pS
     # pivot end values
-    varName = 'seg_{}_end'.format(self._templateROM.pivotParameterID)
+    varName = f'seg_{self._templateROM.pivotParameterID}_end'
     writeTo.addVariable(varName, np.array([]), classify='meta', indices=['segment_number'])
     rlz[varName] = pE
     return rlz
@@ -956,12 +956,23 @@ class Clusters(Segments):
     featureNames = sorted(list(self._clusterInfo['features']['unscaled'].keys()))
     for scaling in ['unscaled', 'scaled']:
       for name in featureNames:
-        varName = 'ClusterFeature|{}|{}'.format(name, scaling)
+        varName = f'ClusterFeature|{name}|{scaling}'
         writeTo.addVariable(varName, np.array([]), classify='meta', indices=['segment_number'])
         rlz[varName] = np.asarray(self._clusterInfo['features'][scaling][name])
     varName = 'ClusterLabels'
     writeTo.addVariable(varName, np.array([]), classify='meta', indices=['segment_number'])
     rlz[varName] = np.asarray(labels)
+
+    segments = self.getSegmentRoms(full=True)
+    for i,rom in enumerate(segments):
+      romRlz = rom.getSegmentPointwiseData()
+      for feature, featureVal in romRlz.items():
+        varName = f'Feature|{feature}'
+        if i==0:
+          writeTo.addVariable(varName, np.array([]), classify='meta', indices=['segment_number'])
+          rlz[varName] = featureVal
+        else:
+          rlz[varName] = np.r_[rlz[varName],featureVal]
 
     writeTo.addRealization(rlz)
 
@@ -981,7 +992,7 @@ class Clusters(Segments):
     labels = self._clusterInfo['labels']
     for i, repRom in enumerate(self._roms):
       # find associated node
-      modify = xmlUtils.findPath(main, 'SegmentROM[@segment={}]'.format(i))
+      modify = xmlUtils.findPath(main, f'SegmentROM[@segment={i}]')
       # make changes to reflect being a cluster
       modify.tag = 'ClusterROM'
       modify.attrib['cluster'] = modify.attrib.pop('segment')
@@ -1720,7 +1731,7 @@ class Interpolated(SupervisedLearning):
       if df is None:
         df = newDf
       else:
-        df = df.append(newDf)
+        df = df._append(newDf)
 
     df.fillna(0.0) # FIXME is 0 really the best for all signals??
     # create interpolators
@@ -1750,7 +1761,7 @@ class Interpolated(SupervisedLearning):
       @ Out, newModel, SupervisedEngine instance, interpolated model
     """
     newModel = copy.deepcopy(exampleModel)
-    segmentRoms = [] # FIXME speedup, make it a numpy array from the start
+    segmentRoms = np.array([])
     for segment in range(N):
       params = dict((param, interp(index)) for param, interp in segmentInterps[segment]['method'].items())
       # DEBUGG, leave for future development
@@ -1761,9 +1772,8 @@ class Interpolated(SupervisedLearning):
       newRom = copy.deepcopy(exampleRoms[segment])
       inputs = newRom.readFundamentalFeatures(params)
       newRom.setFundamentalFeatures(inputs)
-      segmentRoms.append(newRom)
+      segmentRoms = np.r_[segmentRoms, newRom]
 
-    segmentRoms = np.asarray(segmentRoms)
     # add global params
     params = dict((param, interp(index)) for param, interp in globalInterp['method'].items())
     # DEBUGG, leave for future development
