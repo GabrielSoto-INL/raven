@@ -1919,3 +1919,35 @@ class Interpolated(SupervisedLearning):
         associated with the corresponding points in featureVals
     """
     pass
+
+#
+#
+#
+class Decomposition(SupervisedLearning):
+
+  @classmethod
+  def getInputSpecification(cls):
+    return super().getInputSpecification()
+
+  def __init__(self):
+    super().__init__()
+
+
+  # Are private-ish so should not be called directly, so we don't implement them, as they don't fit the collection.
+  def __evaluateLocal__(self, featureVals):
+    """
+      @ In,  featureVals, np.array, 2-D numpy array [n_samples,n_features]
+      @ Out, targetVals , np.array, 1-D numpy array [n_samples]
+    """
+    pass
+
+  def _train(self, featureVals, targetVals):
+    """
+      Perform training on samples in featureVals with responses y.
+      For an one-class model, +1 or -1 is returned.
+      @ In, featureVals, {array-like, sparse matrix}, shape=[n_samples, n_features],
+        an array of input feature values
+      @ Out, targetVals, array, shape = [n_samples], an array of output target
+        associated with the corresponding points in featureVals
+    """
+    pass
