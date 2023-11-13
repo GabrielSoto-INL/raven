@@ -1980,7 +1980,7 @@ class Decomposition(SupervisedLearning):
     #           "macroParameter" is for macro-steps (e.g. from year to year)
     inputSpecs = paramInput.findFirst('Segment')
     self._macroSteps = {}                                               # collection of macro steps (e.g. each year)
-    self._macroTemplate._handleInput(paramInput)            # example "yearly" SVL engine collection
+    self._macroTemplate._handleInput(inputSpecs)            # example "yearly" SVL engine collection
 
   def train(self, tdict):
     """
@@ -1989,28 +1989,31 @@ class Decomposition(SupervisedLearning):
       @ In, trainDict, dict, dicitonary with training data
       @ Out, None
     """
-    # run first set of TSA algorithms (should include some sort of MRA transformer)
-    self._templateROM._train(tdict)
+    # run first set of MR TSA algorithms (should include some sort of MRA transformer)
+    self._templateROM.train(tdict)
 
-    # # tdict should have two parameters, the pivotParameter and the macroParameter -> one step per realization
-    # if self._macroParameter not in tdict:
-    #   self.raiseAnError(IOError, 'The <macroParameter> "{}" was not found in the training DataObject! Training is not possible.'.format(self._macroParameter))
-    # ## TODO how to handle multiple realizations that aren't progressive, e.g. sites???
-    # # create each progressive step
-    # self._macroTemplate.readAssembledObjects()
-    # for macroID in tdict[self._macroParameter]:
-    #   macroID = macroID[0]
-    #   new = self._copyAssembledModel(self._macroTemplate)
-    #   self._macroSteps[macroID] = new
+    # Now we handle all the decomposition levels
+    # temporary...
+    mrTrainedParams = list(self._templateROM._globalROM._tsaTrainedParams.items())[-1]
+    assert mrTrainedParams[0].name == 'DWT', "Only recognizing DWT as MR TSA algo for now"
 
-    # # train the existing steps
-    # for s, step in enumerate(self._macroSteps.values()):
-    #   self.raiseADebug('Training Statepoint Year {} ...'.format(s))
-    #   trainingData = dict((var, [tdict[var][s]]) for var in tdict.keys())
-    #   step.train(trainingData, skipAssembly=True)
-    # self.raiseADebug('  Statepoints trained ')
-    # # interpolate missing steps
-    # self._interpolateSteps(tdict)
+    noPivotTargets = [x for x in self.target if x != self.pivotID]
+    numLvls = len(mrTrainedParams[1][noPivotTargets[0]]['results']['coeff_d'])
+
+    # create new ROM for every level
+    for lvl in range(numLvls):
+      new = copy.deepcopy(self._macroTemplate)
+      self._macroSteps[lvl] = new
+
+    # NOW we train each level decomposition
+    for lvl, decomp in enumerate(self._macroSteps.values()):
+      # write training dict
+      decomp_tdict = copy.deepcopy(tdict)
+      for target in noPivotTargets:
+        decomp_tdict[target] = [mrTrainedParams[1][target]['results']['coeff_d'][lvl]]
+      # train
+      decomp.train(decomp_tdict)
+
     self.amITrained = True
 
   ############### DUMMY ####################

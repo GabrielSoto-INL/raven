@@ -72,8 +72,9 @@ class MultiResolutionTSA(SupervisedLearning):
       @ In, paramInput, InputData.ParameterInput, the already parsed input.
       @ Out, None
     """
+    super()._handleInput(paramInput)
     self._globalROM._handleInput(paramInput)
-
+    self._dynamicHandling = True # This ROM is able to manage the time-series on its own.
 
   def _train(self, featureVals, targetVals):
     """
@@ -82,8 +83,7 @@ class MultiResolutionTSA(SupervisedLearning):
       @ In, targetVals, array, shape = [n_timeStep, n_dimensions], an array of time series data
       @ Out, None
     """
-    # self._globalROM.trainTSASequential
-    return
+    self._globalROM.trainTSASequential(targetVals)
 
   def __evaluateLocal__(self, featureVals):
     """
