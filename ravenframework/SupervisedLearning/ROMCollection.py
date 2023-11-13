@@ -32,6 +32,7 @@ from scipy.interpolate import interp1d
 from ..utils import utils, mathUtils, xmlUtils, randomUtils
 from ..utils import InputData, InputTypes
 from .SupervisedLearning import SupervisedLearning
+from .SyntheticHistory import SyntheticHistory
 # import pickle as pk # TODO remove me!
 import os
 #
@@ -1927,11 +1928,125 @@ class Decomposition(SupervisedLearning):
 
   @classmethod
   def getInputSpecification(cls):
-    return super().getInputSpecification()
+    spec = super().getInputSpecification()
+    # segmenting and clustering
+    segment = InputData.parameterInputFactory("Segment", strictMode=True,
+                                              descr=r"""provides an alternative way to build the ROM. When
+                                                this mode is enabled, the subspace of the ROM (e.g. ``time'') will be divided into segments as
+                                                requested, then a distinct ROM will be trained on each of the segments. This is especially helpful if
+                                                during the subspace the ROM representation of the signal changes significantly. For example, if the signal
+                                                is different during summer and winter, then a signal can be divided and a distinct ROM trained on the
+                                                segments. By default, no segmentation occurs.""")
+    segmentGroups = InputTypes.makeEnumType('segmentGroup', 'segmentGroupType', ['decomposition'])
+    segment.addParam('grouping', segmentGroups, descr=r"""enables the use of ROM subspace clustering in
+        addition to segmenting if set to \xmlString{cluster}. If set to \xmlString{segment}, then performs
+        segmentation without clustering. If clustering, then an additional node needs to be included in the
+        \xmlNode{Segment} node.""", default='decomposition')
+    # sl = SupervisedLearning.getInputSpecification()
+    # segment.addSub(SupervisedLearning.getInputSpecification())
+    sl = SyntheticHistory.getInputSpecification()
+    for sub in sl.subs:
+      segment.addSub(sub)
+    # synthHist = SyntheticHistory.getInputSpecification()
+    # for sub in synthHist.subs:
+    #   segment.addSub(sub)
+    spec.addSub(segment)
+    return spec
 
   def __init__(self):
     super().__init__()
+    self._macroTemplate = SyntheticHistory()
+    self.name = 'Decomposition'
 
+  def setTemplateROM(self, romInfo):
+    """
+      Set the ROM that will be used in this grouping
+      @ In, romInfo, dict, {'name':romName, 'modelInstance':romInstance}, the information used to set up template ROM
+      @ Out, None
+    """
+    self._templateROM = romInfo.get('modelInstance')
+    self._romName = romInfo.get('name', 'unnamed')
+    if self._templateROM is None:
+      self.raiseAnError(IOError, 'A rom instance is required by', self.name, 'please check your implementation')
+
+  def _handleInput(self, paramInput):
+    """
+      Function to handle the common parts of the model parameter input.
+      @ In, paramInput, InputData.ParameterInput, the already parsed input.
+      @ Out, None
+    """
+    super()._handleInput(paramInput)
+    # notation: "pivotParameter" is for micro-steps (e.g. within-year, with a Clusters ROM representing each year)
+    #           "macroParameter" is for macro-steps (e.g. from year to year)
+    inputSpecs = paramInput.findFirst('Segment')
+    self._macroSteps = {}                                               # collection of macro steps (e.g. each year)
+    self._macroTemplate._handleInput(paramInput)            # example "yearly" SVL engine collection
+
+  def train(self, tdict):
+    """
+      Trains the SVL and its supporting SVLs etc. Overwrites base class behavior due to
+        special clustering and macro-step needs.
+      @ In, trainDict, dict, dicitonary with training data
+      @ Out, None
+    """
+    # run first set of TSA algorithms (should include some sort of MRA transformer)
+    self._templateROM._train(tdict)
+
+    # # tdict should have two parameters, the pivotParameter and the macroParameter -> one step per realization
+    # if self._macroParameter not in tdict:
+    #   self.raiseAnError(IOError, 'The <macroParameter> "{}" was not found in the training DataObject! Training is not possible.'.format(self._macroParameter))
+    # ## TODO how to handle multiple realizations that aren't progressive, e.g. sites???
+    # # create each progressive step
+    # self._macroTemplate.readAssembledObjects()
+    # for macroID in tdict[self._macroParameter]:
+    #   macroID = macroID[0]
+    #   new = self._copyAssembledModel(self._macroTemplate)
+    #   self._macroSteps[macroID] = new
+
+    # # train the existing steps
+    # for s, step in enumerate(self._macroSteps.values()):
+    #   self.raiseADebug('Training Statepoint Year {} ...'.format(s))
+    #   trainingData = dict((var, [tdict[var][s]]) for var in tdict.keys())
+    #   step.train(trainingData, skipAssembly=True)
+    # self.raiseADebug('  Statepoints trained ')
+    # # interpolate missing steps
+    # self._interpolateSteps(tdict)
+    self.amITrained = True
+
+  ############### DUMMY ####################
+  # dummy methods that are required by SVL and not generally used
+  def __confidenceLocal__(self, featureVals):
+    """
+      This should return an estimation of the quality of the prediction.
+      This could be distance or probability or anything else, the type needs to be declared in the variable cls.qualityEstType
+      @ In, featureVals, 2-D numpy array , [n_samples,n_features]
+      @ Out, __confidenceLocal__, float, the confidence
+    """
+    pass
+
+  def __resetLocal__(self):
+    """
+      Reset ROM. After this method the ROM should be described only by the initial parameter settings
+      @ In, None
+      @ Out, None
+    """
+    pass
+
+  def __returnCurrentSettingLocal__(self):
+    """
+      Returns a dictionary with the parameters and their current values
+      @ In, None
+      @ Out, params, dict, dictionary of parameter names and current values
+    """
+    return {}
+
+  def __returnInitialParametersLocal__(self):
+    """
+      Returns a dictionary with the parameters and their initial values
+      @ In, None
+      @ Out, params, dict,  dictionary of parameter names and initial values
+    """
+    return {}
 
   # Are private-ish so should not be called directly, so we don't implement them, as they don't fit the collection.
   def __evaluateLocal__(self, featureVals):
