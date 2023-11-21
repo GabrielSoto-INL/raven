@@ -60,7 +60,7 @@ Note all install methods after "main" take
     <psutil/>
     <pip/>
     <importlib_metadata/>
-    <statsforecast source="pip"></statsforecast>
+    <statsforecast/>
     <pyside2 optional='True'/>
     <nomkl os='linux' skip_check='True'/>
     <numexpr os='linux'/>

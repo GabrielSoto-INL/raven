@@ -65,6 +65,7 @@ class MultiResolutionTSA(SupervisedLearning):
     super().__init__()
     self.printTag = 'Multiresolution Synthetic History'
     self._globalROM = SyntheticHistory()
+    self._decompParams = {}
 
   def _handleInput(self, paramInput):
     """
@@ -90,8 +91,8 @@ class MultiResolutionTSA(SupervisedLearning):
       @ In, featureVals, float, a scalar feature value is passed as scaling factor
       @ Out, rlz, dict, realization dictionary of values for each target
     """
-    return super().__evaluateLocal__(featureVals)
-
+    rlz = self._globalROM.evaluateTSASequential()
+    return rlz
 
   ### ESSENTIALLY UNUSED ###
   def _localNormalizeData(self,values,names,feat):

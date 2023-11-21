@@ -219,6 +219,7 @@ class ARMA(TimeSeriesGenerator, TimeSeriesCharacterizer, TimeSeriesTransformer):
         d = d[target] if isinstance(d,dict) else d
       # TODO just use SARIMAX?
       model = statsmodels.tsa.arima.model.ARIMA(normed, order=(P, d, Q), trend='c')
+      model.initialize_approximate_diffuse()
       res = model.fit(low_memory=settings['reduce_memory'])
       # NOTE on low_memory use, test using SyntheticHistory.ARMA test:
       #   case    | time used (s) | memory used (MiB)

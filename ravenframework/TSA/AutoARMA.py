@@ -35,6 +35,7 @@ class AutoARMA(TimeSeriesCharacterizer):
   """
   # class attribute
   _features = []
+  _acceptsMissingValues = True
 
   @classmethod
   def getInputSpecification(cls):
@@ -152,15 +153,15 @@ class AutoARMA(TimeSeriesCharacterizer):
       mask = ~np.isnan(history)
 
       SFAA = AutoARIMA(**statsforecastParams)
-      fittedARIMA = SFAA.fit(y=history[mask])
+      fitted_arima = SFAA.fit(y=history[mask])
 
-      arma_str = re.findall(r'\(([^\\)]+)\)', arima_string(fittedARIMA.model_))[0]
+      arma_str = re.findall(r'\(([^\\)]+)\)', arima_string(fitted_arima.model_))[0]
       p_opt,d_opt,q_opt = [int(a) for a in arma_str.split(',')]
 
       params[target]['P_opt'] = p_opt
       params[target]['D_opt'] = d_opt
       params[target]['Q_opt'] = q_opt
-      del SFAA, fittedARIMA
+      del SFAA, fitted_arima
 
     return params
 
