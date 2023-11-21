@@ -160,6 +160,7 @@ class DWT(TimeSeriesTransformer):
       residual = initial[:,i] - params[target]['results']['coeff_a']
     return residual
 
+
   def getComposite(self, initial, params, pivot, settings):
     """
       Combines two component signals to form a composite signal. This is essentially the inverse
@@ -171,14 +172,19 @@ class DWT(TimeSeriesTransformer):
       @ In, settings, dict, additional settings specific to algorithm
       @ Out, composite, np.array, resulting composite signal
     """
-    composite = initial.copy()
-    for tg, (target, data) in enumerate(params.items()):
-      diffOrder = data['order']
-      signal = initial[:, tg]
-      signal = signal[~np.isnan(signal)]  # drop any masking values
-      for n in range(diffOrder):  # integrate the signal N times
-        signal = np.concatenate(([data['initValues'][-n-1]], signal)).cumsum()
-      composite[:, tg] = signal[:len(composite)]  # truncate to original length
+    try:
+      import pywt
+    except ModuleNotFoundError:
+      print("This RAVEN TSA Module requires the PYWAVELETS library to be installed in the current python environment")
+      raise ModuleNotFoundError
+
+    synthetic = np.zeros((len(pivot), len(params)))
+    for t, (target, _) in enumerate(params.items()):
+      results = params[target]['results']
+      cA = results['coeff_a']
+      cD = results['coeff_d']
+      synthetic[:, t] = pywt.imra(np.vstack([cA,cD]))
+    composite = initial + synthetic
     return composite
 
   def writeXML(self, writeTo, params):
