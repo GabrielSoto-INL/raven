@@ -85,16 +85,17 @@ class AutoARMA(TimeSeriesCharacterizer):
     super().__init__(*args, **kwargs)
     self._maxCombinedPQ = 5
 
-  def handleInput(self, spec):
+  def handleInput(self, spec, enforce_global=False):
     """
       Reads user inputs into this object.
       @ In, spec, InputData.InputParams, input specifications
       @ Out, settings, dict, initialization settings for this algorithm
     """
+    self._enforce_global = enforce_global
     settings = super().handleInput(spec)
     settings['P_upper'] = spec.findFirst('P_upper').value
     settings['Q_upper'] = spec.findFirst('Q_upper').value
-    if not settings['global']:
+    if not settings['global'] and enforce_global:
       raise IOError("AutoARMA is currently only a global TSA algorithm.")
 
     return settings
@@ -107,7 +108,7 @@ class AutoARMA(TimeSeriesCharacterizer):
     """
     settings = super().setDefaults(settings)
     if 'global' not in settings:
-      settings['global'] = True
+      settings['global'] = self._enforce_global
     if 'engine' not in settings:
       settings['engine'] = randomUtils.newRNG()
     return settings
@@ -119,6 +120,7 @@ class AutoARMA(TimeSeriesCharacterizer):
       @ In, pivot, np.1darray, time-like parameter values
       @ In, targets, list(str), names of targets in same order as signal
       @ In, settings, dict, settings for this ROM
+      @ In, trainedParams, dict, running dict of trained algorithm params
       @ Out, params, dict, characteristic parameters
     """
     # set seed for training

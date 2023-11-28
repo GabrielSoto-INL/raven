@@ -64,7 +64,7 @@ class RWD(TimeSeriesCharacterizer):
     super().__init__(*args, **kwargs)
     self._minBins = 20 # this feels arbitrary; used for empirical distr. of data
 
-  def handleInput(self, spec):
+  def handleInput(self, spec, enforce_global=False):
     """
       Reads user inputs into this object.
       @ In, spec, InputData.InputParams, input specifsications
@@ -103,6 +103,7 @@ class RWD(TimeSeriesCharacterizer):
       @ In, pivot, np.1darray, time-like parameter values
       @ In, targets, list(str), names of targets in same order as signal
       @ In, settings, dict, settings for this ROM
+      @ In, trainedParams, dict, running dict of trained algorithm params
       @ Out, params, dict of dict: 1st level contains targets/variables; 2nd contains: U vectors and features
     """
     # settings:

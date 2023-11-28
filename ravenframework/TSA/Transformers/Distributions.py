@@ -49,7 +49,7 @@ class Gaussianize(SKLTransformer):
                    required=False, default=1000)
     return specs
 
-  def handleInput(self, spec):
+  def handleInput(self, spec, enforce_global=False):
     """
       Reads user inputs into this object.
       @ In, spec, InputData.InputParams, input specifications
@@ -95,7 +95,7 @@ class QuantileTransformer(Gaussianize):
                    required=False, default='normal')
     return specs
 
-  def handleInput(self, spec):
+  def handleInput(self, spec, enforce_global=False):
     """
       Reads user inputs into this object.
       @ In, spec, InputData.InputParams, input specifications
@@ -158,6 +158,7 @@ class PreserveCDF(TimeSeriesTransformer):
       @ In, pivot, np.array, time-like parameter
       @ In, targets, list(str), names of targets
       @ In, settings, dict, additional settings specific to algorithm
+      @ In, trainedParams, dict, running dict of trained algorithm params
       @ Out, params, dict, characterization of signal; structure as:
                            params[target variable][characteristic] = value
     """

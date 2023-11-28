@@ -75,7 +75,7 @@ class MarkovAR(TimeSeriesGenerator, TimeSeriesTransformer):
   #
   # API Methods
   #
-  def handleInput(self, spec):
+  def handleInput(self, spec, enforce_global=False):
     """
       Reads user inputs into this object.
       @ In, inp, InputData.InputParams, input specifications
@@ -107,6 +107,7 @@ class MarkovAR(TimeSeriesGenerator, TimeSeriesTransformer):
       @ In, pivot, np.1darray, time-like parameter values
       @ In, targets, list(str), names of targets in same order as signal
       @ In, settings, dict, settings for this ROM
+      @ In, trainedParams, dict, running dict of trained algorithm params
       @ Out, params, dict, characteristic parameters
     """
     # lazy import statsmodels

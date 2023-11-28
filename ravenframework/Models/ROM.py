@@ -228,6 +228,7 @@ class ROM(Dummy):
     self._estimatorNameList = [estimatorNode.value for estimatorNode in estimatorNodeList] if len(estimatorNodeList) > 0 else []
 
     self._interfaceROM = self.interfaceFactory.returnInstance(self.subType)
+
     segmentNode = paramInput.findFirst('Segment')
     ## remove Segment node before passing input xml to SupervisedLearning ROM
     if segmentNode is not None:
@@ -238,8 +239,11 @@ class ROM(Dummy):
       segment = xmlNode.find('Segment')
       romXml = copy.deepcopy(xmlNode)
       romXml.remove(segment)
+      self._interfaceROM.setWillHaveClusters(segType in ['cluster', 'interpolate'])
     else:
       romXml = xmlNode
+      self._interfaceROM.setWillHaveClusters(False)
+
     self._interfaceROM._readMoreXML(romXml)
 
     if self.segment:
