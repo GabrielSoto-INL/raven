@@ -722,7 +722,8 @@ class SupervisedLearning(BaseInterface):
 
   def setWillHaveClusters(self, willHaveClusters: bool):
     """
-      Sets protected class member which tells ROM whether there will be clustering
+      Sets protected class member which tells ROM whether there will be clustered segments.
+      Not to be confused `isClusterable()` -> distinction between `can` and `will`
       @ In, willHaveClusters. bool, will there be
       @ Out, None
     """

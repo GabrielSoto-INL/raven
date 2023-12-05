@@ -28,6 +28,8 @@ from ...utils import xmlUtils, InputTypes, InputData
 class DWT(TimeSeriesTransformer):
   """ Differences the signal N times. """
 
+  _acceptsMissingValues = True
+
   def __init__(self, *args, **kwargs):
     """
       A constructor that will appropriately intialize a time-series analysis object
@@ -90,7 +92,7 @@ class DWT(TimeSeriesTransformer):
                     it doesn't """))
     return specs
 
-  def handleInput(self, spec):
+  def handleInput(self, spec, enforce_global=False):
     """
       Reads user inputs into this object.
       @ In, spec, InputData.InputParams, input specifications
@@ -134,14 +136,19 @@ class DWT(TimeSeriesTransformer):
       levels = max_level
 
     for i, target in enumerate(targets):
-      if np.isnan(signal).any():
-        raise ValueError(f'The history for target {target} contains NaN values.'
-                          'Perhaps there is a Filter transformer that is causing this?')
+      history = signal[:, i]
+      mask = np.isnan(history)
+      history[mask] = 0
+      # TODO:this is temporary for zero-filter SOLAR data... should this also look back to find filter results?
 
       results = params[target]['results']
-      coeffs = pywt.mra(signal[:, i], family, levels, transform='dwt' )
+      coeffs = pywt.mra(history, family, levels, transform='dwt' )
+      for coeff in coeffs:
+        coeff[mask] = np.nan
+
       results['coeff_a'] = coeffs[0]
       results['coeff_d'] = np.vstack([coeffs[i] for i in range(1,levels)]) if levels>1 else coeffs[1][np.newaxis]
+
 
     return params
 
