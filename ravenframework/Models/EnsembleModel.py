@@ -740,7 +740,7 @@ class EnsembleModel(Dummy):
     if self.parallelStrategy == 1:
       # we evaluate the model directly
       try:
-        evaluation = modelDict['Instance'].evaluateSample.original_function(modelDict['Instance'], origInputList, samplerType, inputRlz)
+        evaluation = modelDict['Instance'].evaluateSample(origInputList, samplerType, inputRlz)
       except Exception:
         excType, excValue, excTrace = sys.exc_info()
         evaluation = None
