@@ -66,14 +66,14 @@ class MooseBasedApp(CodeInterfaceBase):
     returnCommand = executeCommand, outputfile
     return returnCommand
 
-  def createNewInput(self, currentInputFiles, oriInputFiles, samplerType, **Kwargs):
+  def createNewInput(self, currentInputFiles, oriInputFiles, samplerType, rlz):
     """
       this generates a new input file depending on which sampler has been chosen
       @ In, currentInputFiles, list,  list of current input files (input files from last this method call)
       @ In, oriInputFiles, list, list of the original input files
       @ In, samplerType, string, Sampler type (e.g. MonteCarlo, Adaptive, etc. see manual Samplers section)
-      @ In, Kwargs, dictionary, kwarded dictionary of parameters. In this dictionary there is another dictionary called "SampledVars"
-             where RAVEN stores the variables that got sampled (e.g. Kwargs['SampledVars'] => {'var1':10,'var2':40})
+      @ In, rlz, Realization, sampled input that should be entered into code run
+            (e.g. rlz.inputInfo['SampledVarsPb'] => {'var1':10,'var2':40})
       @ Out, newInputFiles, list, list of newer input files, list of the new input files (modified and not)
     """
     # TODO not currently maintained: dynamic event tree sampling for MOOSE applications
@@ -81,6 +81,7 @@ class MooseBasedApp(CodeInterfaceBase):
     found = False
     genericInput, genericOriInput = [], []
     # identify modifyable input files
+    index=None
     for i, inputFile in enumerate(currentInputFiles):
       inFile = inputFile.getAbsFile()
       if inFile.endswith(self.getInputExtension()):
@@ -96,7 +97,7 @@ class MooseBasedApp(CodeInterfaceBase):
     # get a parser for the input file
     parser = MOOSEparser.MOOSEparser(currentInputFiles[index].getAbsFile())
     # apply the requested modifications
-    modifDict = self._expandVarNames(**Kwargs)
+    modifDict = self._expandVarNames(rlz)
     ### set up output to place in a csv
     modifDict.append({'csv':'true','file_base': outName, 'name':['Outputs', 'csv']})
     ### do modifications
@@ -108,7 +109,7 @@ class MooseBasedApp(CodeInterfaceBase):
     # or this.
     if genericInput:
       parser = GenericParser.GenericParser(genericInput)
-      parser.modifyInternalDictionary(**Kwargs)
+      parser.modifyInternalDictionary(rlz)
       parser.writeNewInput(genericInput, genericOriInput)
 
     return currentInputFiles
@@ -145,12 +146,14 @@ class MooseBasedApp(CodeInterfaceBase):
     """
       This method will assure the full proper variable names are returned in a dictionary.
       @ In, rlz, Realization, sampled input that should be entered into code run
+            (e.g. rlz.inputInfo['SampledVarsPb'] => {'var1':10,'var2':40})
       @ Out, requests, list(dict), dictionaries contain:
                'name': [path,to,name],
                short varname: var value
     """
     requests = []
-    for var in rlz:
+    info = rlz.inputInfo
+    for var in info:
       modifDict = {}
       # colon is used when we want to perturb element in the vector of given variable
       elemLoc = None
@@ -161,15 +164,15 @@ class MooseBasedApp(CodeInterfaceBase):
       if '|' not in request:
         # what modifications don't have the path in them?
         # global alias parameters
-        modifDict[var] = rlz[var]
+        modifDict[var] = info[var]
         modifDict['name'] = [var]
       else:
         pathedName = request.split('|')
         modifDict['name'] = pathedName
         if elemLoc is not None:
-          modifDict[pathedName[-1]] = (int(elemLoc), rlz[var])
+          modifDict[pathedName[-1]] = (int(elemLoc), info[var])
         else:
-          modifDict[pathedName[-1]] = rlz[var]
+          modifDict[pathedName[-1]] = info[var]
       requests.append(modifDict)
     return requests
 

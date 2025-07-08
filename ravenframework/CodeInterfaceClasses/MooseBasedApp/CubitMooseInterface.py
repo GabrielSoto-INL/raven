@@ -87,14 +87,14 @@ class CubitMoose(CodeInterfaceBase): #MooseBasedAppInterface,CubitInterface):
     print('ExecutionCommand:',returnCommand[0],'\n')
     return returnCommand
 
-  def createNewInput(self,currentInputFiles,origInputFiles,samplerType,**Kwargs):
+  def createNewInput(self,currentInputFiles,origInputFiles,samplerType,rlz):
     """
       Generates new perturbed input files.
       @ In, currentInputFiles, list,  list of current input files (input files from last this method call)
       @ In, oriInputFiles, list, list of the original input files
       @ In, samplerType, string, Sampler type (e.g. MonteCarlo, Adaptive, etc. see manual Samplers section)
-      @ In, Kwargs, dictionary, kwarded dictionary of parameters. In this dictionary there is another dictionary called "SampledVars"
-             where RAVEN stores the variables that got sampled (e.g. Kwargs['SampledVars'] => {'var1':10,'var2':40})
+      @ In, rlz, Realization, sampled input that should be entered into code run
+            (e.g. rlz.inputInfo['SampledVarsPb'] => {'var1':10,'var2':40})
       @ Out, newInputFiles, list, list of newer input files, list of the new input files (modified and not)
     """
     mooseInp,cubitInp = self.findInps(currentInputFiles)
@@ -102,18 +102,18 @@ class CubitMoose(CodeInterfaceBase): #MooseBasedAppInterface,CubitInterface):
     origCubitInp = origInputFiles[currentInputFiles.index(cubitInp)]
     #split up sampledvars in kwargs between moose and Cubit script
     #  NOTE This works by checking the '@' split for the keyword Cubit at first!
-    margs = copy.deepcopy(Kwargs)
-    cargs = copy.deepcopy(Kwargs)
-    for vname,var in Kwargs['SampledVars'].items():
+    mRlz = copy.deepcopy(rlz)
+    cRlz = copy.deepcopy(rlz)
+    for vname,var in rlz.inputInfo['SampledVarsPb'].items():
       fullName = vname
       if fullName.split('@')[0]=='Cubit':
-        del margs['SampledVars'][vname]
+        del mRlz['SampledVarsPb'][vname]
       else:
-        del cargs['SampledVars'][vname]
+        del cRlz['SampledVarsPb'][vname]
     # Generate new cubit input files and extract exodus file name to add to SampledVars going to moose
-    newCubitInputs = self.CubitInterface.createNewInput([cubitInp],[origCubitInp],samplerType,**cargs)
-    margs['SampledVars']['Mesh|file'] = 'mesh~'+newCubitInputs[0].getBase()+'.e'#"".join(os.path.split(newCubitInputs[0])[1].split('.')[:-1])+'.e'
-    newMooseInputs = self.MooseInterface.createNewInput([mooseInp],[origMooseInp],samplerType,**margs)
+    newCubitInputs = self.CubitInterface.createNewInput([cubitInp],[origCubitInp],samplerType,cRlz)
+    mRlz['SampledVarsPb']['Mesh|file'] = 'mesh~'+newCubitInputs[0].getBase()+'.e'#"".join(os.path.split(newCubitInputs[0])[1].split('.')[:-1])+'.e'
+    newMooseInputs = self.MooseInterface.createNewInput([mooseInp],[origMooseInp],samplerType,mRlz)
     #  if order doesn't matter, can loop through and check for type else copy directly
     newMooseInp,newCubitInp = self.findInps(currentInputFiles)
     newMooseInp.setAbsFile(newMooseInputs[0].getAbsFile())

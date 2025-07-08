@@ -95,15 +95,15 @@ class BatemanSimple(CodeInterfaceBase):
     validExtensions = ('xml', 'XML', 'Xml')
     return validExtensions
 
-  def createNewInput(self, currentInputFiles, oriInputFiles, samplerType, **Kwargs):
+  def createNewInput(self, currentInputFiles, origInputFiles, samplerType, rlz):
     """
       Generate a new OpenModelica input file (XML format) from the original, changing parameters
-      as specified in Kwargs['SampledVars']
+      as specified in rlz.inputInfo['SampledVarsPb']
       @ In , currentInputFiles, list,  list of current input files (input files of this iteration)
-      @ In , oriInputFiles, list, list of the original input files
+      @ In , origInputFiles, list, list of the original input files
       @ In , samplerType, string, Sampler type (e.g. MonteCarlo, Adaptive, etc. see manual Samplers section)
-      @ In , Kwargs, dictionary, kwarded dictionary of parameters. In this dictionary there is another dictionary called "SampledVars"
-            where RAVEN stores the variables that got sampled (e.g. Kwargs['SampledVars'] => {'var1':10,'var2':40})
+      @ In, rlz, Realization, sampled input that should be entered into code run
+            (e.g. rlz.inputInfo['SampledVarsPb'] => {'var1':10,'var2':40})
       @ Out, newInputFiles, list, list of newer input files, list of the new input files (modified and not)
     """
     # Look for the correct input file
@@ -113,7 +113,7 @@ class BatemanSimple(CodeInterfaceBase):
         found = True
         break
     if not found:
-      raise Exception('No correct input file has been found. Got: '+' '.join(oriInputFiles))
+      raise Exception('No correct input file has been found. Got: '+' '.join(origInputFiles))
 
     originalPath = currentInputFiles[index].getAbsFile()
 
@@ -124,7 +124,8 @@ class BatemanSimple(CodeInterfaceBase):
     root = tree.getroot()
 
     # grep the variables that got sampled
-    varDict = Kwargs['SampledVars']
+    info = rlz.inputInfo
+    varDict = info['SampledVarsPb']
     # the syntax of the variables is decided by us
     # for this test we decide that the variable names determine the way to walk in the input file
     # level_1|level_2|...|level_n|variableName

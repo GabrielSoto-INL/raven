@@ -139,7 +139,7 @@ class GenericParser():
   def modifyInternalDictionary(self, rlz):
     """
       Edits the parsed file stored in self.segments to enter new variable values preparatory to a new run.
-      @ In, rlz, Realization, Realization from whiech to build input
+      @ In, rlz, Realization, Realization from which to build input
       @ Out, None
     """
     modDict = rlz

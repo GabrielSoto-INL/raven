@@ -172,15 +172,14 @@ class AcceleratedCFD(CodeInterfaceBase):
       raise IOError('no "'+inputType+'" type file has been found!')
     return podDictInput
 
-  def createNewInput(self, currentInputFiles, oriInputFiles, samplerType, **Kwargs):
+  def createNewInput(self, currentInputFiles, oriInputFiles, samplerType, rlz):
     """
       Generate a new AccelerateCFD input file (txt format) from the original, changing parameters
       as specified in Kwargs['SampledVars'].
       @ In, currentInputFiles, list,  list of current input files (input files from last this method call)
       @ In, oriInputFiles, list, list of the original input files
       @ In, samplerType, string, Sampler type (e.g. MonteCarlo, Adaptive, etc. see manual Samplers section)
-      @ In, Kwargs, dictionary, kwarded dictionary of parameters. In this dictionary there is another dictionary called "SampledVars"
-            where RAVEN stores the variables that got sampled (e.g. Kwargs['SampledVars'] => {'var1':10,'var2':40})
+      @ In, rlz, Realization, sampled input that should be entered into code run
       @ Out, newInputFiles, list, list of newer input files, list of the new input files (modified and not)
     """
     if 'dynamiceventtree' in str(samplerType).lower():
@@ -188,7 +187,7 @@ class AcceleratedCFD(CodeInterfaceBase):
     currentInputsToPerturb = self.findInps(currentInputFiles,"input")
     originalInputs         = self.findInps(oriInputFiles,"input")
     parser = GenericParser.GenericParser(currentInputsToPerturb)
-    parser.modifyInternalDictionary(**Kwargs)
+    parser.modifyInternalDictionary(rlz)
     parser.writeNewInput(currentInputsToPerturb,originalInputs)
     return currentInputFiles
 

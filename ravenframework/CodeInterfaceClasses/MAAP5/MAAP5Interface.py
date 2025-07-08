@@ -70,32 +70,34 @@ class MAAP5(GenericCode):
     if (len(self.boolOutputVariables)==0) and (len(self.contOutputVariables)==0):
       raise IOError('At least one of two nodes <boolMaapOutputVariables> or <contMaapOutputVariables> has to be specified')
 
-  def createNewInput(self,currentInputFiles,oriInputFiles,samplerType,**Kwargs):
+  def createNewInput(self,currentInputFiles,oriInputFiles,samplerType,rlz):
     """
       This method is used to generate an input based on the information passed in.
       @ In, currentInputFiles, list,  list of current input files (input files from last this method call)
       @ In, oriInputFiles, list, list of the original input files
       @ In, samplerType, string, Sampler type (e.g. MonteCarlo, Adaptive, etc. see manual Samplers section)
-      @ In, Kwargs, dictionary, kwarded dictionary of parameters. In this dictionary there is another dictionary called "SampledVars"
-            where RAVEN stores the variables that got sampled (e.g. Kwargs['SampledVars'] => {'var1':10,'var2':40})
+      @ In, rlz, Realization, sampled input that should be entered into code run
+            (e.g. rlz.inputInfo['SampledVarsPb'] => {'var1':10,'var2':40}
       @ Out, newInputFiles, list, list of newer input files, list of the new input files (modified and not)
     """
     self.samplerType=samplerType
+    info = rlz.inputInfo
+    parentID = info.get("RAVEN_parentID", "None")
     if 'dynamiceventtree' in str(samplerType).lower():
-      if Kwargs['RAVEN_parentID'] == 'None':
+      if parentID == 'None':
         self.oriInput(oriInputFiles) #original input files are checked only the first time
-      self.stopSimulation(currentInputFiles, Kwargs)
+      self.stopSimulation(currentInputFiles, rlz)
 ###########
-      if Kwargs['RAVEN_parentID'] != 'None':
-        print('Kwargs',Kwargs)
-        self.restart(currentInputFiles, Kwargs['RAVEN_parentID'])
+      if parentID != 'None':
+        print('Rlz Info:',info)
+        self.restart(currentInputFiles, parentID)
 ###########
         if len(self.multiBranchOccurred)>0:
-          self.multiBranchMethod(currentInputFiles, Kwargs)
+          self.multiBranchMethod(currentInputFiles, rlz)
 ###########
-        if str(Kwargs['prefix'].split('-')[-1]) != '1':
-          self.modifyBranch(currentInputFiles, Kwargs)
-    return GenericCode.createNewInput(self,currentInputFiles,oriInputFiles,samplerType,**Kwargs)
+        if str(info['prefix'].split('-')[-1]) != '1':
+          self.modifyBranch(currentInputFiles, rlz)
+    return GenericCode.createNewInput(self,currentInputFiles,oriInputFiles,samplerType,rlz)
 
   def oriInput(self, oriInputFiles):
     """
@@ -313,14 +315,16 @@ class MAAP5(GenericCode):
       print ('RESTART FILE name has been corrected',restarFileCorrect)
 
 ########################
-  def modifyBranch(self,currentInputFiles,Kwargs):
+  def modifyBranch(self,currentInputFiles,rlz):
     """
       This method is aimed to modify the branch in order to reflect the info
       coming from the DET-based sampler
       @ In, currentInputFiles, list, list of input files
-      @ In, Kwargs, dict, dictionary of kwarded values
+      @ In, rlz, Realization, sampled input that should be entered into code run
       @ Out, None
     """
+    info = rlz.inputInfo
+
     block=False
     lineNumber=0
     n=0
@@ -335,15 +339,15 @@ class MAAP5(GenericCode):
     fileobject.close()
     for line in lines:
       lineNumber=lineNumber+1
-      if 'C Branching '+str((self.branch[Kwargs['RAVEN_parentID']])[0]) in line:
+      if 'C Branching '+str((self.branch[info['RAVEN_parentID']])[0]) in line:
         block=True
-      if n==len(Kwargs['branchChangedParam']):
+      if n==len(info['branchChangedParam']):
         block=False
         break
       if block:
-        for cont,var in enumerate(Kwargs['branchChangedParam']):
+        for cont,var in enumerate(info['branchChangedParam']):
           if (var in line) and ('=' in line):
-            newLine=' '+str(var)+'='+str(Kwargs['branchChangedParamValue'][cont])+'\n'
+            newLine=' '+str(var)+'='+str(info['branchChangedParamValue'][cont])+'\n'
             print('Line correctly modified. New line is: ',newLine)
             lines[lineNumber-1]=newLine
             fileobject = open(inp, "w")
@@ -604,15 +608,18 @@ class MAAP5(GenericCode):
       self.DictAllVars["Dict{0}".format(var)]= DictVar #with Dict{0}.format(var) dictionary referred to each single sampled variable is called DictVar (e.g., 'DictTIMELOCA', 'DictAFWOFF')
       print('self.DictAllVars',self.DictAllVars)
 
-  def stopSimulation(self,currentInputFiles, Kwargs):
+  def stopSimulation(self,currentInputFiles, rlz):
     """
       ONLY FOR DET SAMPLER!
       This method update the stop simulation condition into the MAAP5 input
       to stop the run when the new branch occurs
       @ In, currentInputFiles, list, list of the current input files
-      @ Out, Kwargs, dict,kwarded dictionary of parameters. In this dictionary there is another dictionary called "SampledVars"
-           where RAVEN stores the variables that got sampled (e.g. Kwargs['SampledVars'] => {'var1':10,'var2':40})
+      @ In, rlz, Realization, sampled input that should be entered into code run
+            (e.g. rlz.inputInfo['SampledVarsPb'] => {'var1':10,'var2':40}}
     """
+    info = rlz.inputInfo
+    parentID = info.get("RAVEN_parentID", "None")
+
     for filename in currentInputFiles:
       if '.inp' in str(filename):
         inp=filename.getAbsFile() #input file name with full path
@@ -624,14 +631,14 @@ class MAAP5(GenericCode):
     currentFolder=os.path.dirname(inp)
     currentFolder = os.path.split(currentFolder)[-1]
     parents=[]
-    self.values[currentFolder]=Kwargs['SampledVars']
+    self.values[currentFolder]=info['SampledVarsPb']
     lineStop = int(lines.index(str('C Stop Simulation condition\n')))+1
 ########################
     lineStopList=[lineStop]
     while lines[lineStopList[-1]+1].split(' ')[0]=='OR':
       lineStopList.append(lineStopList[-1]+1)
 ########################
-    if Kwargs['RAVEN_parentID']== 'None':
+    if parentID== 'None':
       if self.stop!='mission_time':
         self.lineTimerComplete.append('TIMER '+str(self.stopTimer))
 ####################
@@ -644,7 +651,7 @@ class MAAP5(GenericCode):
 ####################
         raise IOError('All TIMER must be considered for the first simulation') #in the original input file all the timer must be mentioned
     else:
-      #Kwargs['RAVEN_parentID'] != 'None'
+      #parentID != 'None'
       parent=currentFolder[:-2]
       parents.append(parent)
       while len(parent.split('_')[-1])>2: #collect the name of all the parents, their corresponding timer need to be deleted from the stop condition (when the parents has already occurred)
@@ -689,13 +696,14 @@ class MAAP5(GenericCode):
       fileobject.close()
 
 ###########
-  def multiBranchMethod(self,currentInputFiles,Kwargs):
+  def multiBranchMethod(self,currentInputFiles,rlz):
     """
       This method is aimed to handle the multi branch strategy
       @ In, currentInputFiles, list, list of input files
-      @ In, Kwargs, dict, dictionary of kwarded values
+      @ In, rlz, Realization, sampled input that should be entered into code run
       @ Out, None
     """
+    info = rlz.inputInfo
     for filename in currentInputFiles:
       if '.inp' in str(filename):
         inp=filename.getAbsFile() #input file name with full path
@@ -703,7 +711,7 @@ class MAAP5(GenericCode):
     linesCurrent=fileobject.readlines()
     fileobject.close()
 
-    parentInput=str(inp).replace(str(Kwargs['prefix']),str(Kwargs['RAVEN_parentID']))
+    parentInput=str(inp).replace(str(info['prefix']),str(info['RAVEN_parentID']))
     fileobject = open(parentInput, "r")
     linesParent=fileobject.readlines()
     fileobject.close()

@@ -110,14 +110,14 @@ class Melcor(CodeInterfaceBase):
 
     return returnCommand
 
-  def createNewInput(self,currentInputFiles,origInputFiles,samplerType,**Kwargs):
+  def createNewInput(self,currentInputFiles,origInputFiles,samplerType,rlz):
     """
       This generates a new input file depending on which sampler is chosen
       @ In, currentInputFiles, list,  list of current input files (input files from last this method call)
       @ In, oriInputFiles, list, list of the original input files
       @ In, samplerType, string, Sampler type (e.g. MonteCarlo, Adaptive, etc. see manual Samplers section)
-      @ In, Kwargs, dictionary, kwarded dictionary of parameters. In this dictionary there is another dictionary called "SampledVars"
-             where RAVEN stores the variables that got sampled (e.g. Kwargs['SampledVars'] => {'var1':10,'var2':40})
+      @ In, rlz, Realization, sampled input that should be entered into code run
+            (e.g. rlz.inputInfo['SampledVarsPb'] => {'var1':10,'var2':40})
       @ Out, newInputFiles, list, list of newer input files, list of the new input files (modified and not)
     """
 
@@ -132,7 +132,7 @@ class Melcor(CodeInterfaceBase):
       if inputFile.getExt() in self.getInputExtension():
         origFiles.append(inputFile)
     parser = GenericParser.GenericParser(inFiles)
-    parser.modifyInternalDictionary(**Kwargs)
+    parser.modifyInternalDictionary(rlz)
     parser.writeNewInput(currentInputFiles,origFiles)
 
     return currentInputFiles

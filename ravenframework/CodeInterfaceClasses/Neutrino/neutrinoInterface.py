@@ -97,16 +97,15 @@ class Neutrino(CodeInterfaceBase):
     validExtensions = ('nescene')
     return validExtensions
 
-  def createNewInput(self, currentInputFiles, oriInputFiles, samplerType, **Kwargs):
+  def createNewInput(self, currentInputFiles, oriInputFiles, samplerType, rlz):
     """
       Generate a new OpenModelica input file (XML format) from the original, changing parameters
       as specified in Kwargs['SampledVars']
       @ In , currentInputFiles, list,  list of current input files (input files of this iteration)
       @ In , oriInputFiles, list, list of the original input files
       @ In , samplerType, string, Sampler type (e.g. MonteCarlo, Adaptive, etc. see manual Samplers section)
-      @ In , Kwargs, dictionary, kwarded dictionary of parameters. In this dictionary there is another
-             dictionary called "SampledVars" where RAVEN stores the variables that got sampled
-             (e.g. Kwargs['SampledVars'] => {'var1':10,'var2':40})
+      @ In, rlz, Realization, sampled input that should be entered into code run
+            (e.g. rlz.inputInfo['SampledVarsPb'] => {'var1':10,'var2':40})
       @ Out, newInputFiles, list, list of newer input files, list of the new input files (modified and not)
     """
     # Look for the correct input file
@@ -128,7 +127,8 @@ class Neutrino(CodeInterfaceBase):
     root = tree.getroot()
 
     # grep the variables that got sampled
-    varDict = Kwargs['SampledVars']
+    info = rlz.inputInfo
+    varDict = info['SampledVarsPb']
 
     # Go through sampled variables
     for var in varDict:

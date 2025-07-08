@@ -101,14 +101,13 @@ class CTF(CodeInterfaceBase):
       inputDict['otherInp'] = otherInp
     return inputDict
 
-  def createNewInput(self, currentInputFiles, origInputFiles, samplerType, **Kwargs):
+  def createNewInput(self, currentInputFiles, origInputFiles, samplerType, rlz):
     """
       Generates new perturbed input files for CTF sequences
       @ In, currentInputFiles, list,  list of current input files
       @ In, origInputFiles, list, list of the original input files
       @ In, samplerType, string, Sampler type (e.g. MonteCarlo, Adaptive, etc. see manual Samplers section)
-      @ In, Kwargs, dict, dictionary of parameters. In this dictionary there is another dictionary called "SampledVars"
-        where RAVEN stores the variables that got sampled (e.g. Kwargs['SampledVars'] => {'var1':10,'var2':40})
+      @ In, rlz, Realization, sampled input that should be entered into code run
       @ Out, newInputFiles, list, list of new input files (modified or not)
     """
     if 'dynamiceventtree' in str(samplerType).lower():
@@ -116,7 +115,7 @@ class CTF(CodeInterfaceBase):
     currentInputsToPerturb = [item for subList in self.findInps(currentInputFiles).values() for item in subList]
     originalInputs         = [item for subList in self.findInps(origInputFiles).values() for item in subList]
     parser = GenericParser.GenericParser(currentInputsToPerturb)
-    parser.modifyInternalDictionary(**Kwargs)
+    parser.modifyInternalDictionary(rlz)
     parser.writeNewInput(currentInputsToPerturb,originalInputs)
     return currentInputFiles
 
